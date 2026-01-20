@@ -2,7 +2,9 @@ package main;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.time.LocalDateTime; 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.json.simple.JSONObject;
 
 public class Client {
@@ -40,8 +42,8 @@ public class Client {
 		task.put("ID", IDTask);
 		task.put("Description", answer[1]);
 		task.put("Status", null);
-		task.put("CreatedAt", LocalDateTime.now());
-		task.put("UpdateAt", LocalDateTime.now());
+		task.put("CreatedAt", Date());
+		task.put("UpdateAt", Date());
 		
 		try (FileWriter file = new FileWriter("Task.json")) {
             file.write(task.toJSONString());
@@ -49,6 +51,7 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
         }
+		System.out.println("Taks added perfectly");
 	}
 
 	private static void updateTask(String[] answer) {
@@ -76,6 +79,13 @@ public class Client {
 		
 	}
 
+	public static String Date() {
+		LocalDateTime myDate = LocalDateTime.now();
+	    DateTimeFormatter myFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+	    String now = myDate.format(myFormat);
+		return now;
+		
+	}
 	public static void Message() {
 	    System.out.println("Welcome to the Task Trackern\n"
 	    		+ "These are the valid commands to manage the task:\n"
