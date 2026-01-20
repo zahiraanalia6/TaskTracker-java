@@ -1,17 +1,21 @@
 package main;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 public class Client {
 	private static int IDTask;
 	
-	public static void main(String[] args) {
-		File file = new File("Tasks.json");
+	public static void main(String[] args){
+		getTasksArray();
 		Message();
 		String command = args[0];
 		
@@ -37,23 +41,74 @@ public class Client {
 	    }	
 	}
 	
-	private static void addTask(String[] answer) {
-		JSONObject task = new JSONObject();
-		task.put("ID", IDTask);
-		task.put("Description", answer[1]);
-		task.put("Status", null);
-		task.put("CreatedAt", Date());
-		task.put("UpdateAt", Date());
-		
-		try (FileWriter file = new FileWriter("Task.json")) {
-            file.write(task.toJSONString());
-            file.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-		System.out.println("Taks added perfectly");
+	private static JSONArray getTasksArray() {
+	    File file = new File("Task.json");
+
+	    try {
+	        if (!file.exists()) {
+	            FileWriter writer = new FileWriter(file);
+	            writer.write("[]");
+	            writer.close();
+	        }
+
+	        FileReader reader = new FileReader(file);
+	        Object obj = JSONValue.parse(reader);
+	        reader.close();
+
+	        return (JSONArray) obj;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return new JSONArray();
+	    }
+	}
+	
+	private static void addTask(String[] args) {
+	    JSONArray tasks = getTasksArray();
+	    int newId = getNextID(tasks);
+
+	    JSONObject task = new JSONObject();
+	    task.put("ID", newId);
+	    task.put("Description", args[1]);
+	    task.put("Status", "todo");
+	    task.put("CreatedAt", Date());
+	    task.put("UpdateAt", Date());
+
+	    tasks.add(task);
+
+	    try (FileWriter file = new FileWriter("Task.json")) {
+	        file.write("[\n");
+	        for (int i = 0; i < tasks.size(); i++) {
+	            file.write("  " + tasks.get(i).toString());
+	            if (i < tasks.size() - 1) {
+	                file.write(",");
+	            }
+	            file.write("\n");
+	        }
+	        file.write("]");
+	        file.flush();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    System.out.println("Task added successfully (ID: " + newId + ")");
 	}
 
+
+	private static int getNextID(JSONArray tasks) {
+		int maxId = 0;
+
+	    for (Object t : tasks) {
+	        JSONObject task = (JSONObject) t;
+	        long id = (long) task.get("ID");
+	        if (id > maxId) {
+	            maxId = (int) id;
+	        }
+	    }
+
+	    return maxId + 1;
+	}
+	
 	private static void updateTask(String[] answer) {
 		// TODO Auto-generated method stub
 		
