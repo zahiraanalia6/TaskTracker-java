@@ -1,11 +1,15 @@
 package main;
 
-import java.util.Scanner;  
+import java.io.File;
+import java.io.FileWriter;
+import java.time.LocalDateTime; 
+import org.json.simple.JSONObject;
 
 public class Client {
 	private static int IDTask;
 	
 	public static void main(String[] args) {
+		File file = new File("Tasks.json");
 		Message();
 		String command = args[0];
 		
@@ -32,7 +36,19 @@ public class Client {
 	}
 	
 	private static void addTask(String[] answer) {
+		JSONObject task = new JSONObject();
+		task.put("ID", IDTask);
+		task.put("Description", answer[1]);
+		task.put("Status", null);
+		task.put("CreatedAt", LocalDateTime.now());
+		task.put("UpdateAt", LocalDateTime.now());
 		
+		try (FileWriter file = new FileWriter("Task.json")) {
+            file.write(task.toJSONString());
+            file.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 	}
 
 	private static void updateTask(String[] answer) {
